@@ -19,7 +19,6 @@ Thread(target=run_web, daemon=True).start()
 
 # --- إعدادات البوت ---
 intents = discord.Intents.default()
-intents.message_content = True
 intents.guilds = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -27,20 +26,19 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     print(f"تم تسجيل الدخول بنجاح باسم: {bot.user.name}")
+    print("⏳ جاري الإرسال في جميع الرومات النصية بكل السيرفرات المتواجد بها البوت...")
 
-@bot.command(name="spam")
-@commands.has_permissions(administrator=True)
-async def spam_channels(ctx):
-    await ctx.send("⏳ جاري إرسال الرسالة في كافة الرومات النصية...")
+    # المرور على جميع السيرفرات التي يتواجد بها البوت
+    for guild in bot.guilds:
+        # المرور على جميع الرومات النصية في السيرفر
+        for channel in guild.text_channels:
+            try:
+                await channel.send("اطردني اطردني")
+                print(f"✅ تم الإرسال في القناة: {channel.name} ({guild.name})")
+            except Exception as e:
+                print(f"❌ فشل الإرسال في القناة {channel.name}: {e}")
 
-    # المرور على جميع قنوات السيرفر النصية
-    for channel in ctx.guild.text_channels:
-        try:
-            await channel.send("اطردني اطردني")
-        except Exception as e:
-            print(f"فشل الإرسال في القناة {channel.name}: {e}")
-
-    await ctx.send("✅ تم إرسال الرسالة في جميع الرومات المتاحة!")
+    print("🎉 تم الانتهاء من الإرسال في جميع الرومات!")
 
 # جلب التوكين من متغيرات البيئة
 TOKEN = os.getenv("BOT_TOKEN") or os.getenv("DISCORD_TOKEN")
