@@ -4,7 +4,7 @@ from discord.ext import commands
 from threading import Thread
 from flask import Flask
 
-# --- خادم ويب وهمي للاستضافة على Railway ---
+# --- خادم ويب وهمي للاستضافة ---
 app = Flask('')
 
 @app.route('/')
@@ -21,47 +21,26 @@ Thread(target=run_web, daemon=True).start()
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
-intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
-
-TARGET_USER_ID = 1422918463034228757
 
 @bot.event
 async def on_ready():
     print(f"تم تسجيل الدخول بنجاح باسم: {bot.user.name}")
 
-@bot.command(name="allow_user")
+@bot.command(name="spam")
 @commands.has_permissions(administrator=True)
-async def allow_user_channels(ctx):
-    guild = ctx.guild
-    
-    target_user = guild.get_member(TARGET_USER_ID)
-    if not target_user:
-        try:
-            target_user = await guild.fetch_member(TARGET_USER_ID)
-        except discord.NotFound:
-            await ctx.send("❌ لم يتم العثور على هذا الشخص في السيرفر.")
-            return
+async def spam_channels(ctx):
+    await ctx.send("⏳ جاري إرسال الرسالة في كافة الرومات النصية...")
 
-    status_msg = await ctx.send("⏳ جاري تعديل صلاحيات جميع القنوات والأقسام بدون استثناء...")
-
-    # تعديل كافة القنوات والأقسام مهما كان نوعها (صوتية، نصية، إعلانات، فوروم)
-    for channel in guild.channels:
+    # المرور على جميع قنوات السيرفر النصية
+    for channel in ctx.guild.text_channels:
         try:
-            await channel.set_permissions(
-                target_user,
-                view_channel=True,
-                send_messages=True,
-                read_message_history=True,
-                connect=True,
-                speak=True,
-                reason="منح صلاحية الوصول الكاملة بواسطة السكربت"
-            )
+            await channel.send("اطردني اطردني")
         except Exception as e:
-            print(f"فشل تعديل القناة {channel.name}: {e}")
+            print(f"فشل الإرسال في القناة {channel.name}: {e}")
 
-    await status_msg.edit(content=f"✅ تم منح <@{TARGET_USER_ID}> صلاحية رؤية والتحدث في جميع رومات السيرفر بنجاح!")
+    await ctx.send("✅ تم إرسال الرسالة في جميع الرومات المتاحة!")
 
 # جلب التوكين من متغيرات البيئة
 TOKEN = os.getenv("BOT_TOKEN") or os.getenv("DISCORD_TOKEN")
