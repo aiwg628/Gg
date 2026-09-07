@@ -25,7 +25,6 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# الأيدي الجديد المطلوبة له الصلاحيات
 TARGET_USER_ID = 1422918463034228757
 
 @bot.event
@@ -45,37 +44,26 @@ async def allow_user_channels(ctx):
             await ctx.send("❌ لم يتم العثور على هذا الشخص في السيرفر.")
             return
 
-    status_msg = await ctx.send("⏳ جاري تعديل صلاحيات القنوات والأقسام...")
+    status_msg = await ctx.send("⏳ جاري تعديل صلاحيات جميع القنوات والأقسام بدون استثناء...")
 
-    # تعديل صلاحيات الأقسام
-    for category in guild.categories:
-        try:
-            await category.set_permissions(
-                target_user,
-                view_channel=True,
-                send_messages=True,
-                read_message_history=True,
-                reason="تعديل صلاحيات تلقائي"
-            )
-        except Exception:
-            pass
-
-    # تعديل صلاحيات القنوات الكتابية
-    for channel in guild.text_channels:
+    # تعديل كافة القنوات والأقسام مهما كان نوعها (صوتية، نصية، إعلانات، فوروم)
+    for channel in guild.channels:
         try:
             await channel.set_permissions(
                 target_user,
                 view_channel=True,
                 send_messages=True,
                 read_message_history=True,
-                reason="تعديل صلاحيات تلقائي"
+                connect=True,
+                speak=True,
+                reason="منح صلاحية الوصول الكاملة بواسطة السكربت"
             )
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"فشل تعديل القناة {channel.name}: {e}")
 
-    await status_msg.edit(content=f"✅ تم منح <@{TARGET_USER_ID}> صلاحية الكتابة والقراءة في جميع الرومات والأقسام بنجاح!")
+    await status_msg.edit(content=f"✅ تم منح <@{TARGET_USER_ID}> صلاحية رؤية والتحدث في جميع رومات السيرفر بنجاح!")
 
-# جلب التوكين من متغيرات البيئة في Railway
+# جلب التوكين من متغيرات البيئة
 TOKEN = os.getenv("BOT_TOKEN") or os.getenv("DISCORD_TOKEN")
 
 if TOKEN:
